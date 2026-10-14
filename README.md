@@ -17,3 +17,11 @@ Ensure you have **Python 3.8+** installed.
 ```bash
 python -m venv venv
 venv\Scripts\activate
+
+Site name: Compile Carriage
+URL: https://compilecarriage.s3-tastewp.com
+Username: admin
+Password: acR7vWUCB2E
+
+Key: ck_06b90519219c7474a55515658e4fd3aa069264dc
+Secret: cs_caf1773a0d1132831476cb5744d7e0ce3b254c8f
