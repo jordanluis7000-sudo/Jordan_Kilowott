@@ -4,7 +4,7 @@ import json
 import difflib
 import requests
 
-st.set_page_config(page_title="PIM SpecSheet Generator", layout="wide", page_icon="📦")
+st.set_page_config(page_title="SNAP-TO-SKU", layout="wide", page_icon="📦")
 
 # Standard PIM Schema Definition (Image removed for stability)
 SCHEMA_MAPPING = {
