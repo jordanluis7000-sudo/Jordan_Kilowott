@@ -56,7 +56,7 @@ def calculate_data_health(row):
     return int((filled_fields / total_fields) * 100)
 
 # --- UI HEADER ---
-st.title("📦 Excel-to-PIM Spec Sheet Generator")
+st.title("📦 SNAP-TO-SKU")
 st.caption("Automated ingestion, schema normalization, and technical spec sheet generation.")
 
 # --- FILE UPLOADER ---
