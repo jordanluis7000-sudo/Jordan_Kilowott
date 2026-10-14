@@ -6,7 +6,7 @@ import requests
 
 st.set_page_config(page_title="PIM SpecSheet Generator", layout="wide", page_icon="📦")
 
-# Standard PIM Schema Definition with known supplier aliases
+# Standard PIM Schema Definition (Image removed for stability)
 SCHEMA_MAPPING = {
     "sku": ["sku", "item_code", "part_number", "product_id", "id"],
     "product_name": ["name", "product_name", "title", "item_name", "description"],
@@ -92,7 +92,7 @@ if uploaded_file:
         st.subheader("Data Remediation Grid")
         st.caption("Edit missing or incorrect fields below. Changes update the spec sheet instantly.")
         
-        # UPGRADE 1: Interactive Grid (Replaces static dataframe)
+        # Interactive Grid
         edited_df = st.data_editor(clean_df, num_rows="dynamic", use_container_width=True, hide_index=True)
         
         # Recalculate health score dynamically after user edits
@@ -100,16 +100,15 @@ if uploaded_file:
 
         st.write("---")
         st.subheader("Product Selector")
-        # FIXED: Syntax error resolved on this line
+        
         product_options = [f"{row['sku']} - {row['product_name']}" for _, row in edited_df.iterrows()]
         selected_idx = st.selectbox("Select a product to preview:", range(len(product_options)), format_func=lambda x: product_options[x])
-        
         selected_prod = edited_df.iloc[selected_idx]
 
     with right_panel:
         st.subheader("Standardized Technical Spec Sheet")
         
-        # UPGRADE 2: Rule-Based Compliance Flags
+        # Rule-Based Compliance Flags
         critical_missing = []
         if str(selected_prod['weight']).strip() in ["N/A", "", "nan", "None"]: critical_missing.append("Weight (required for shipping)")
         if str(selected_prod['price']).strip() in ["N/A", "", "nan", "None"]: critical_missing.append("Base Price")
@@ -128,7 +127,7 @@ if uploaded_file:
                 st.caption(f"**Brand:** {selected_prod['brand']} | **Category:** {selected_prod['category']}")
             
             with head_col2:
-                # UPGRADE 3: Dynamic QR Code
+                # Dynamic QR Code
                 sku_safe = str(selected_prod['sku']).replace(" ", "%20")
                 qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={sku_safe}"
                 st.image(qr_url, caption="SKU QR Code", width=80)
@@ -175,7 +174,7 @@ if uploaded_file:
                 mime="text/csv"
             )
 
-        # --- NEW SECTION: LIVE WOOCOMMERCE API PUSH ---
+        # --- LIVE WOOCOMMERCE API PUSH ---
         st.write("---")
         st.subheader("🚀 Live WooCommerce Syndication")
         
@@ -199,7 +198,7 @@ if uploaded_file:
                     "description": f"<strong>Material:</strong> {selected_prod['material']}<br><strong>Color:</strong> {selected_prod['color']}<br><strong>Compliance:</strong> {selected_prod['compliance']}",
                     "short_description": f"Brand: {selected_prod['brand']}",
                     "sku": selected_prod['sku'],
-                    "weight": str(selected_prod['weight']).replace("kg", "").replace("g", "").strip() # basic cleanup
+                    "weight": str(selected_prod['weight']).replace("kg", "").replace("g", "").strip()
                 }
 
                 # 2. Build the API Endpoint
@@ -208,15 +207,18 @@ if uploaded_file:
                 # 3. Fire the request
                 try:
                     with st.spinner("Syncing to WooCommerce..."):
-                        from requests.auth import HTTPBasicAuth
+                        # Send keys in the URL parameters instead of headers to bypass server blocks
                         response = requests.post(
                             endpoint,
                             json=woo_payload,
-                            auth=HTTPBasicAuth(woo_key, woo_secret)
+                            params={
+                                "consumer_key": woo_key.strip(),
+                                "consumer_secret": woo_secret.strip()
+                            }
                         )
                     
                     # 4. Handle the response
-                    if response.status_code == 201: # 201 means "Created"
+                    if response.status_code in [200, 201]: 
                         st.success("✅ Successfully published to WooCommerce!")
                         st.balloons()
                         live_url = response.json().get('permalink')
